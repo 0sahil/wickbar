@@ -16,6 +16,8 @@ Instead of keeping a terminal tab open per server (`npm run dev`, `tailscale ser
 
 ![Wickbar main window: a sidebar of saved commands with status dots, and a live terminal showing a running dev server](docs/images/main-window.png)
 
+<img src="docs/images/popover.png" width="360" alt="Wickbar menu bar popover: running commands with uptime and restart/stop buttons, plus Open Wickbar, Add command, Start all, Stop all, Settings and Quit">
+
 Requires macOS 14 (Sonoma) or later on Apple Silicon. Wickbar is not sandboxed (it runs arbitrary shell
 commands), so it is distributed outside the Mac App Store.
 
