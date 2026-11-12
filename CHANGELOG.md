@@ -6,6 +6,11 @@ All notable changes to Wickbar are documented here. The format is based on
 
 ## [Unreleased]
 
+### Added
+- `WICKBAR_CONFIG_DIR` environment variable to use a different config folder (e.g. a second copy side by side).
+- `scripts/demo.sh`: launches an isolated demo copy with sample commands.
+- README screenshot.
+
 ## [0.1.0] - 2026-11-12
 
 First public release.

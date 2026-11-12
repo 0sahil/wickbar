@@ -18,8 +18,14 @@ scripts/build-app.sh        # build/Wickbar.app (ad-hoc signed)
 open build/Wickbar.app
 ```
 
-Tip: quit any installed copy of Wickbar first. Two copies would fight over the MCP port (9425)
-and share the same config file in `~/Library/Application Support/Wickbar/`.
+Tip: to run your dev build next to an installed Wickbar, give it its own config folder and turn off
+its MCP server (or change the port) in that config, otherwise the two copies share
+`~/Library/Application Support/Wickbar/` and fight over port 9425:
+
+```sh
+open -n --env WICKBAR_CONFIG_DIR=/tmp/wickbar-dev build/Wickbar.app
+# or: scripts/demo.sh   (isolated copy with sample commands, MCP off)
+```
 
 ## Project layout
 - `Sources/WickbarCore/` — pure logic with no AppKit (config, output buffer, HTTP/MCP server). Put testable logic here.

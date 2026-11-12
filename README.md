@@ -14,6 +14,8 @@ Instead of keeping a terminal tab open per server (`npm run dev`, `tailscale ser
 - restart them automatically when they crash (exponential backoff),
 - let agents configure and control them over **MCP**.
 
+![Wickbar main window: a sidebar of saved commands with status dots, and a live terminal showing a running dev server](docs/images/main-window.png)
+
 Requires macOS 14 (Sonoma) or later on Apple Silicon. Wickbar is not sandboxed (it runs arbitrary shell
 commands), so it is distributed outside the Mac App Store.
 
@@ -38,6 +40,10 @@ open /Applications/Wickbar.app
 
 The version comes from the `VERSION` file. The bundle id is `com.0sahil.wickbar`. The app is an
 `LSUIElement` (no Dock icon) until you open its main window.
+
+To try it without touching your own setup, `scripts/demo.sh` launches a second, isolated copy with
+sample commands (`scripts/demo.sh --stop` quits it). Any copy can be pointed at a different config folder
+with the `WICKBAR_CONFIG_DIR` environment variable.
 
 Local builds are only ad-hoc signed, so macOS may ask you to confirm the first launch
 (right-click › Open, or System Settings › Privacy & Security). Maintainers: see
@@ -201,6 +207,7 @@ Sources/Wickbar/
 Tests/WickbarTests/      Output buffer / ANSI, config round-trip, HTTP parsing, JSON-RPC/MCP dispatch, command lookup
 scripts/build-app.sh     Release build, .app assembly, icon generation, signing (ad-hoc or SIGN_IDENTITY)
 scripts/package-release.sh  Developer ID sign + notarize + staple + zip (used by the release workflow)
+scripts/demo.sh          Isolated demo copy with sample commands (used for screenshots)
 scripts/make-icon.swift  Draws the app icon (flame on a warm rounded square)
 .github/workflows/       CI (build + test on every push/PR) and Release (signed, notarized draft release on v* tags)
 ```

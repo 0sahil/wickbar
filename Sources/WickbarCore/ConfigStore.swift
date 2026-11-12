@@ -36,7 +36,12 @@ public final class ConfigStore {
     public let directory: URL
     public var configURL: URL { directory.appendingPathComponent("config.json") }
 
+    /// `~/Library/Application Support/Wickbar`, or `$WICKBAR_CONFIG_DIR` when set (for development,
+    /// demos and running a second copy side by side without touching your real config).
     public static var defaultDirectory: URL {
+        if let override = ProcessInfo.processInfo.environment["WICKBAR_CONFIG_DIR"], !override.isEmpty {
+            return URL(fileURLWithPath: (override as NSString).expandingTildeInPath, isDirectory: true)
+        }
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Library/Application Support")
         return base.appendingPathComponent("Wickbar", isDirectory: true)
