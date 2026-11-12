@@ -1,7 +1,8 @@
 # Releasing Wickbar (maintainers)
 
 Releases are built by GitHub Actions (`.github/workflows/release.yml`): Developer ID signed,
-hardened runtime, notarized by Apple, stapled, zipped, and attached to a **draft** GitHub release.
+hardened runtime, notarized by Apple, stapled, packaged as a drag-to-Applications `.dmg` (also signed,
+notarized and stapled) and a `.zip`, and attached to a **draft** GitHub release.
 
 ## One-time setup
 
@@ -47,6 +48,7 @@ To rebuild an existing tag: Actions › Release › *Run workflow* with the tag 
 
 ## Local signed build (optional)
 ```sh
+brew install create-dmg                      # once
 xcrun notarytool store-credentials wickbar   # once; interactive
 SIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" NOTARY_PROFILE=wickbar scripts/package-release.sh
 # or SKIP_NOTARIZE=1 to only sign

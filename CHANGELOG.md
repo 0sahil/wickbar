@@ -10,6 +10,7 @@ All notable changes to Wickbar are documented here. The format is based on
 - `WICKBAR_CONFIG_DIR` environment variable to use a different config folder (e.g. a second copy side by side).
 - `scripts/demo.sh`: launches an isolated demo copy with sample commands.
 - README screenshot.
+- Releases now include a signed, notarized drag-to-Applications `.dmg` next to the `.zip`.
 
 ## [0.1.0] - 2026-11-12
 

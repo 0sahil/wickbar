@@ -51,6 +51,9 @@ jobs:
       - name: Test
         run: swift test
 
+      - name: Install create-dmg
+        run: brew install create-dmg
+
       - name: Import Developer ID certificate
         env:
           P12_BASE64: ${{ secrets.DEVELOPER_ID_P12_BASE64 }}
@@ -98,10 +101,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           ZIP="build/Wickbar-$VERSION.zip"
+          DMG="build/Wickbar-$VERSION.dmg"
           if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" "$ZIP" "$ZIP.sha256" --clobber
+            gh release upload "$TAG" "$DMG" "$DMG.sha256" "$ZIP" "$ZIP.sha256" --clobber
           else
-            gh release create "$TAG" "$ZIP" "$ZIP.sha256" --draft \
+            gh release create "$TAG" "$DMG" "$DMG.sha256" "$ZIP" "$ZIP.sha256" --draft \
               --title "Wickbar $VERSION" --notes-file "$RUNNER_TEMP/notes.md"
           fi
 

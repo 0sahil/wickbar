@@ -21,8 +21,8 @@ commands), so it is distributed outside the Mac App Store.
 
 ## Install
 
-Download `Wickbar-<version>.zip` from the [latest release](https://github.com/0sahil/wickbar/releases/latest),
-unzip it, and move `Wickbar.app` to `/Applications`. Releases are signed with a Developer ID and notarized by Apple,
+Download `Wickbar-<version>.dmg` from the [latest release](https://github.com/0sahil/wickbar/releases/latest),
+open it, and drag Wickbar into Applications (a `.zip` is attached too). Releases are signed with a Developer ID and notarized by Apple,
 so they open without Gatekeeper warnings. Then click the flame in the menu bar.
 
 ## Build from source
@@ -206,7 +206,8 @@ Sources/Wickbar/
   System/                Launch at login (SMAppService), notifications
 Tests/WickbarTests/      Output buffer / ANSI, config round-trip, HTTP parsing, JSON-RPC/MCP dispatch, command lookup
 scripts/build-app.sh     Release build, .app assembly, icon generation, signing (ad-hoc or SIGN_IDENTITY)
-scripts/package-release.sh  Developer ID sign + notarize + staple + zip (used by the release workflow)
+scripts/package-release.sh  Developer ID sign + notarize + staple, then zip + DMG (used by the release workflow)
+scripts/make-dmg.sh      Drag-to-Applications DMG (create-dmg) with a drawn background (make-dmg-background.swift)
 scripts/demo.sh          Isolated demo copy with sample commands (used for screenshots)
 scripts/make-icon.swift  Draws the app icon (flame on a warm rounded square)
 .github/workflows/       CI (build + test on every push/PR) and Release (signed, notarized draft release on v* tags)

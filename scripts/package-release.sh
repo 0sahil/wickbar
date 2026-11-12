@@ -8,7 +8,8 @@
 #   - Stored keychain profile:     NOTARY_PROFILE  (created with `xcrun notarytool store-credentials`)
 #   - SKIP_NOTARIZE=1              sign only (local testing; Gatekeeper will still warn)
 #
-# Output: build/Wickbar-<version>.zip and build/Wickbar-<version>.zip.sha256
+# Output: build/Wickbar-<version>.dmg (drag-to-Applications) and build/Wickbar-<version>.zip,
+#         each with a .sha256 file. The DMG needs create-dmg (brew install create-dmg).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -23,6 +24,8 @@ esac
 VERSION="$(tr -d '[:space:]' < VERSION)"
 APP="$ROOT/build/Wickbar.app"
 ZIP="$ROOT/build/Wickbar-$VERSION.zip"
+DMG="$ROOT/build/Wickbar-$VERSION.dmg"
+command -v create-dmg >/dev/null || { echo "create-dmg not found: brew install create-dmg" >&2; exit 1; }
 
 SIGN_IDENTITY="$SIGN_IDENTITY" bash "$ROOT/scripts/build-app.sh"
 
@@ -63,6 +66,24 @@ fi
 
 echo "==> Packaging $ZIP"
 ditto -c -k --sequesterRsrc --keepParent "$APP" "$ZIP"
-(cd "$ROOT/build" && shasum -a 256 "$(basename "$ZIP")" > "$(basename "$ZIP").sha256")
-cat "$ZIP.sha256"
-echo "==> Done: $ZIP"
+
+# DMG from the (already notarized + stapled) app, then sign, notarize and staple the DMG itself.
+SIGN_IDENTITY="$SIGN_IDENTITY" bash "$ROOT/scripts/make-dmg.sh" "$APP" "$DMG"
+if [[ ${#notary_args[@]} -gt 0 ]]; then
+  echo "==> Notarizing DMG"
+  xcrun notarytool submit "$DMG" "${notary_args[@]}" --wait --timeout 30m | tee "$ROOT/build/notarize-dmg.log"
+  if ! grep -q "status: Accepted" "$ROOT/build/notarize-dmg.log"; then
+    id="$(awk '/^  id:/{print $2; exit}' "$ROOT/build/notarize-dmg.log")"
+    [[ -n "$id" ]] && xcrun notarytool log "$id" "${notary_args[@]}" || true
+    echo "DMG notarization failed" >&2
+    exit 1
+  fi
+  xcrun stapler staple "$DMG"
+  xcrun stapler validate "$DMG"
+  spctl --assess --type open --context context:primary-signature --verbose=2 "$DMG"
+fi
+
+rm -f "$DMG.sha256"
+(cd "$ROOT/build" && for f in "$(basename "$ZIP")" "$(basename "$DMG")"; do shasum -a 256 "$f" > "$f.sha256"; done)
+cat "$ZIP.sha256" "$DMG.sha256"
+echo "==> Done: $DMG and $ZIP"
