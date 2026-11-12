@@ -40,7 +40,7 @@ final class ConfigTests: XCTestCase {
         {
           "settings": { "autoStartOnLaunch": true, "mcpEnabled": true, "mcpPort": 9425, "restoreAfterCrash": "ask" },
           "commands": [
-            { "id": "6F9619FF-8B86-D011-B42D-00C04FC964FF", "name": "kanzo", "command": "kanzo", "workingDirectory": "~",
+            { "id": "6F9619FF-8B86-D011-B42D-00C04FC964FF", "name": "web", "command": "npm run dev", "workingDirectory": "~",
               "environment": {"KEY": "VALUE"}, "autoStart": true, "restartPolicy": "onFailure" }
           ]
         }

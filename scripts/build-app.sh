@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# Builds a release Wickbar.app into build/ (ad-hoc signed).
+# Builds a release Wickbar.app into build/.
 #   scripts/build-app.sh            -> build/Wickbar.app
 #   scripts/build-app.sh --install  -> also copies it to /Applications/Wickbar.app
+# Signing: ad-hoc by default. Set SIGN_IDENTITY (e.g. "Developer ID Application: Name (TEAMID)")
+# to sign with hardened runtime + secure timestamp, as required for notarization.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -11,7 +13,7 @@ INSTALL=0
 for arg in "$@"; do
   case "$arg" in
     --install) INSTALL=1 ;;
-    -h|--help) sed -n '2,4p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,6p' "$0"; exit 0 ;;
     *) echo "Unknown option: $arg" >&2; exit 2 ;;
   esac
 done
@@ -68,16 +70,23 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>NSHighResolutionCapable</key><true/>
   <key>NSSupportsAutomaticTermination</key><false/>
   <key>NSSupportsSuddenTermination</key><false/>
-  <key>NSHumanReadableCopyright</key><string>Wickbar</string>
+  <key>NSHumanReadableCopyright</key><string>© 2026 Sahil. MIT License.</string>
 </dict>
 </plist>
 PLIST
 printf 'APPL????' > "$APP/Contents/PkgInfo"
 plutil -lint "$APP/Contents/Info.plist" >/dev/null
 
-echo "==> Signing (ad-hoc)"
-codesign --force --deep --sign - --timestamp=none "$APP"
-codesign --verify --verbose=2 "$APP"
+if [[ -n "${SIGN_IDENTITY:-}" ]]; then
+  echo "==> Signing with: $SIGN_IDENTITY (hardened runtime)"
+  codesign --force --options runtime --timestamp \
+    --entitlements "$ROOT/scripts/Wickbar.entitlements" \
+    --sign "$SIGN_IDENTITY" "$APP"
+else
+  echo "==> Signing (ad-hoc)"
+  codesign --force --deep --sign - --timestamp=none "$APP"
+fi
+codesign --verify --strict --verbose=2 "$APP"
 
 echo "==> Built $APP"
 

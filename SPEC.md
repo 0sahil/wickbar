@@ -1,8 +1,8 @@
 # Wickbar — Spec (v1)
 
 Wickbar is a native macOS menu-bar app that keeps your long-running terminal commands
-alive and visible. It replaces "a terminal tab per server" (e.g. `kanzo`,
-`hermes dashboard --no-open`, `tailscale serve ...`) with saved commands that you can
+alive and visible. It replaces "a terminal tab per server" (e.g. `npm run dev`,
+`python -m http.server`, `tailscale serve ...`) with saved commands that you can
 start/stop, watch live in a real terminal view, auto-start on login, and restart on crash.
 Agents can configure and control it over MCP.
 
@@ -24,7 +24,7 @@ Stored as human-editable JSON at `~/Library/Application Support/Wickbar/config.j
 {
   "settings": { "autoStartOnLaunch": true, "mcpEnabled": true, "mcpPort": 9425, "restoreAfterCrash": "ask" },
   "commands": [
-    { "id": "UUID", "name": "kanzo", "command": "kanzo", "workingDirectory": "~",
+    { "id": "UUID", "name": "web", "command": "npm run dev", "workingDirectory": "~/code/web",
       "environment": {"KEY": "VALUE"}, "autoStart": true,
       "restartPolicy": "onFailure" }
   ]

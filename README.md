@@ -1,9 +1,12 @@
 # Wickbar
 
+[![CI](https://github.com/0sahil/wickbar/actions/workflows/ci.yml/badge.svg)](https://github.com/0sahil/wickbar/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 A native macOS menu-bar app that keeps your long-running terminal commands alive and visible.
 
 Instead of keeping a terminal tab open per server (`npm run dev`, `tailscale serve 3000`,
-`hermes dashboard --no-open`, …), save them in Wickbar and:
+`python -m http.server`, …), save them in Wickbar and:
 
 - start / stop / restart them from the menu bar,
 - watch their output live in a real terminal view (colors, prompts, Ctrl-C all work: commands run in a PTY),
@@ -14,9 +17,15 @@ Instead of keeping a terminal tab open per server (`npm run dev`, `tailscale ser
 Requires macOS 14 (Sonoma) or later on Apple Silicon. Wickbar is not sandboxed (it runs arbitrary shell
 commands), so it is distributed outside the Mac App Store.
 
-## Build & install
+## Install
 
-You need Xcode (or the Swift toolchain) with Swift 6, and network access for SwiftPM to fetch
+Download `Wickbar-<version>.zip` from the [latest release](https://github.com/0sahil/wickbar/releases/latest),
+unzip it, and move `Wickbar.app` to `/Applications`. Releases are signed with a Developer ID and notarized by Apple,
+so they open without Gatekeeper warnings. Then click the flame in the menu bar.
+
+## Build from source
+
+You need Xcode (or the Swift toolchain) with Swift 6.2 or newer, and network access for SwiftPM to fetch
 [SwiftTerm](https://github.com/migueldeicaza/SwiftTerm).
 
 ```sh
@@ -30,8 +39,9 @@ open /Applications/Wickbar.app
 The version comes from the `VERSION` file. The bundle id is `com.0sahil.wickbar`. The app is an
 `LSUIElement` (no Dock icon) until you open its main window.
 
-Since the app is only ad-hoc signed, macOS may ask you to confirm the first launch
-(right-click › Open, or System Settings › Privacy & Security).
+Local builds are only ad-hoc signed, so macOS may ask you to confirm the first launch
+(right-click › Open, or System Settings › Privacy & Security). Maintainers: see
+[docs/RELEASING.md](docs/RELEASING.md) for signed, notarized releases.
 
 ## Usage
 
@@ -189,9 +199,16 @@ Sources/Wickbar/
   UI/                    Menu bar popover, main window, detail + terminal pane, editor, settings
   System/                Launch at login (SMAppService), notifications
 Tests/WickbarTests/      Output buffer / ANSI, config round-trip, HTTP parsing, JSON-RPC/MCP dispatch, command lookup
-scripts/build-app.sh     Release build, .app assembly, icon generation, ad-hoc signing
+scripts/build-app.sh     Release build, .app assembly, icon generation, signing (ad-hoc or SIGN_IDENTITY)
+scripts/package-release.sh  Developer ID sign + notarize + staple + zip (used by the release workflow)
 scripts/make-icon.swift  Draws the app icon (flame on a warm rounded square)
+.github/workflows/       CI (build + test on every push/PR) and Release (signed, notarized draft release on v* tags)
 ```
+
+## Contributing
+
+Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). Report security issues privately as
+described in [SECURITY.md](SECURITY.md). Changes are tracked in [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 

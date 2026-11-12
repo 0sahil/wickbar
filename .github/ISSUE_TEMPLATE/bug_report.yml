@@ -1,0 +1,39 @@
+name: Bug report
+description: Something isn't working
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Add a command `...`
+        2. Click Start
+        3. ...
+  - type: input
+    id: version
+    attributes:
+      label: Wickbar version
+      description: Shown in Wickbar › About, or the release you downloaded.
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      placeholder: e.g. macOS 15.2
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant output or config
+      description: Command output, or the relevant part of ~/Library/Application Support/Wickbar/config.json. Remove secrets first.
+      render: text

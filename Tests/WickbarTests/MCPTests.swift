@@ -321,8 +321,8 @@ final class MCPTests: XCTestCase {
 }
 
 final class CommandLookupTests: XCTestCase {
-    let a = CommandConfig(name: "kanzo", command: "kanzo")
-    let b = CommandConfig(name: "Hermes", command: "hermes dashboard --no-open")
+    let a = CommandConfig(name: "web", command: "npm run dev")
+    let b = CommandConfig(name: "Tunnel", command: "tailscale serve 3000")
 
     func testById() {
         XCTAssertEqual(try CommandLookup.find(b.id.uuidString, in: [a, b]).get(), b)
@@ -330,9 +330,9 @@ final class CommandLookupTests: XCTestCase {
     }
 
     func testByExactAndCaseInsensitiveName() {
-        XCTAssertEqual(try CommandLookup.find("kanzo", in: [a, b]).get(), a)
-        XCTAssertEqual(try CommandLookup.find("hermes", in: [a, b]).get(), b)
-        XCTAssertEqual(try CommandLookup.find("  HERMES ", in: [a, b]).get(), b)
+        XCTAssertEqual(try CommandLookup.find("web", in: [a, b]).get(), a)
+        XCTAssertEqual(try CommandLookup.find("tunnel", in: [a, b]).get(), b)
+        XCTAssertEqual(try CommandLookup.find("  TUNNEL ", in: [a, b]).get(), b)
     }
 
     func testExactBeatsCaseInsensitive() {
@@ -344,12 +344,12 @@ final class CommandLookupTests: XCTestCase {
 
     func testMissing() {
         guard case .failure(let e) = CommandLookup.find("nope", in: [a, b]) else { return XCTFail() }
-        XCTAssertTrue(e.message.contains("kanzo"))
+        XCTAssertTrue(e.message.contains("web"))
         guard case .failure = CommandLookup.find("", in: [a]) else { return XCTFail() }
     }
 
     func testNameIsTaken() {
-        XCTAssertTrue(CommandLookup.nameIsTaken("KANZO", in: [a, b]))
-        XCTAssertFalse(CommandLookup.nameIsTaken("KANZO", in: [a, b], excluding: a.id))
+        XCTAssertTrue(CommandLookup.nameIsTaken("WEB", in: [a, b]))
+        XCTAssertFalse(CommandLookup.nameIsTaken("WEB", in: [a, b], excluding: a.id))
     }
 }
