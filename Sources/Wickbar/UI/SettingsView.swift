@@ -18,6 +18,7 @@ struct SettingsView: View {
 
 private struct GeneralSettings: View {
     @EnvironmentObject var manager: ProcessManager
+    @EnvironmentObject var updater: Updater
 
     var body: some View {
         Form {
@@ -49,6 +50,18 @@ private struct GeneralSettings: View {
                     ForEach(RestoreAfterCrash.allCases, id: \.self) { Text($0.displayName).tag($0) }
                 }
                 Text("If Wickbar quits unexpectedly, restore the commands that were running.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section {
+                Toggle("Automatically check for updates", isOn: Binding(
+                    get: { updater.automaticallyChecksForUpdates },
+                    set: { updater.automaticallyChecksForUpdates = $0 }))
+                    .disabled(!updater.isAvailable)
+                Text(updater.isAvailable
+                     ? "Wickbar \(updater.currentVersion)"
+                     : "Updates are only available when Wickbar runs from an .app bundle.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

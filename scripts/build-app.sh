@@ -34,6 +34,15 @@ rm -rf "$APP" "$ICONSET"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN_DIR/$APP_NAME" "$APP/Contents/MacOS/$APP_NAME"
 
+# Sparkle (in-app updates). SwiftPM links it as @rpath/Sparkle.framework but only adds build-tree rpaths.
+echo "==> Embedding Sparkle.framework"
+mkdir -p "$APP/Contents/Frameworks"
+ditto "$BIN_DIR/Sparkle.framework" "$APP/Contents/Frameworks/Sparkle.framework"
+# The XPC services are only needed by sandboxed apps; Sparkle's docs allow removing them otherwise.
+rm -rf "$APP/Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices" \
+       "$APP/Contents/Frameworks/Sparkle.framework/XPCServices"
+install_name_tool -add_rpath "@executable_path/../Frameworks" "$APP/Contents/MacOS/$APP_NAME"
+
 # SwiftPM resource bundles (none today, but copy any that appear).
 shopt -s nullglob
 for bundle in "$BIN_DIR"/*.bundle; do
@@ -49,6 +58,10 @@ iconutil -c icns "$ICONSET" -o "$APP/Contents/Resources/AppIcon.icns"
 rm -rf "$ICONSET"
 
 BUILD_NUMBER="$(git -C "$ROOT" rev-list --count HEAD 2>/dev/null || echo 1)"
+# Sparkle: the appcast is a release asset, so it is only served once a draft release is published.
+# SUEnableAutomaticChecks skips Sparkle's "check automatically?" prompt; the Settings toggle turns it off.
+FEED_URL="https://github.com/0sahil/wickbar/releases/latest/download/appcast.xml"
+SPARKLE_PUBLIC_KEY="CjTyR0tSh2gi26TITWkJr+Idwr6xW6Nv7kUuR9EdHII="
 cat > "$APP/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -71,22 +84,34 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>NSSupportsAutomaticTermination</key><false/>
   <key>NSSupportsSuddenTermination</key><false/>
   <key>NSHumanReadableCopyright</key><string>© 2026 Sahil. MIT License.</string>
+  <key>SUFeedURL</key><string>$FEED_URL</string>
+  <key>SUPublicEDKey</key><string>$SPARKLE_PUBLIC_KEY</string>
+  <key>SUEnableAutomaticChecks</key><true/>
 </dict>
 </plist>
 PLIST
 printf 'APPL????' > "$APP/Contents/PkgInfo"
 plutil -lint "$APP/Contents/Info.plist" >/dev/null
 
+# Inside-out, without --deep (per Sparkle's docs): Sparkle's helpers, then the framework, then the app.
+SPARKLE="$APP/Contents/Frameworks/Sparkle.framework"
+NESTED=("$SPARKLE/Versions/B/Autoupdate" "$SPARKLE/Versions/B/Updater.app" "$SPARKLE")
 if [[ -n "${SIGN_IDENTITY:-}" ]]; then
   echo "==> Signing with: $SIGN_IDENTITY (hardened runtime)"
+  for item in "${NESTED[@]}"; do
+    codesign --force --options runtime --timestamp --sign "$SIGN_IDENTITY" "$item"
+  done
   codesign --force --options runtime --timestamp \
     --entitlements "$ROOT/scripts/Wickbar.entitlements" \
     --sign "$SIGN_IDENTITY" "$APP"
 else
   echo "==> Signing (ad-hoc)"
-  codesign --force --deep --sign - --timestamp=none "$APP"
+  for item in "${NESTED[@]}"; do
+    codesign --force --sign - --timestamp=none "$item"
+  done
+  codesign --force --sign - --timestamp=none "$APP"
 fi
-codesign --verify --strict --verbose=2 "$APP"
+codesign --verify --deep --strict --verbose=2 "$APP"
 
 echo "==> Built $APP"
 
