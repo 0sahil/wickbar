@@ -27,10 +27,18 @@ Download `Wickbar-<version>.dmg` from the [latest release](https://github.com/0s
 open it, and drag Wickbar into Applications (a `.zip` is attached too). Releases are signed with a Developer ID and notarized by Apple,
 so they open without Gatekeeper warnings. Then click the flame in the menu bar.
 
+### Updating
+
+Wickbar checks for updates once a day. Right after launch it shows a new version straight away; later in the
+day it adds a quiet "Update available" row to the menu bar popover instead. Click it to see what's new and choose
+*Install and Relaunch* (your running commands are stopped cleanly first).
+You can also use *Check for Updates…* in the popover, or turn automatic checks off in *Settings › General*.
+Versions 0.1.x have no updater, so install 0.2.0 manually once; updates are automatic from then on.
+
 ## Build from source
 
 You need Xcode (or the Swift toolchain) with Swift 6.2 or newer, and network access for SwiftPM to fetch
-[SwiftTerm](https://github.com/migueldeicaza/SwiftTerm).
+[SwiftTerm](https://github.com/migueldeicaza/SwiftTerm) and [Sparkle](https://sparkle-project.org) (updates).
 
 ```sh
 swift build                       # debug build
@@ -57,7 +65,7 @@ Local builds are only ad-hoc signed, so macOS may ask you to confirm the first l
   triangle with a count when a command has crashed.
 - **Popover:** every command with a status dot (green running, yellow starting/restarting,
   red crashed, grey stopped), its uptime or exit code, and inline start/stop/restart buttons.
-  Click a row to open its output. The footer has Open Wickbar, Start all, Stop all, Settings… and Quit.
+  Click a row to open its output. The footer has Open Wickbar, Start all, Stop all, Settings…, Check for Updates… and Quit.
 - **Main window:** a sidebar of commands (right-click to start/stop/restart/edit/duplicate/delete; drag to reorder)
   and a detail pane with the command, status, pid, uptime, buttons, and a **live terminal**. Type into it
   to answer prompts or press Ctrl-C. Output (the last ~2 MB per command) is kept while the window is closed.
@@ -65,7 +73,7 @@ Local builds are only ad-hoc signed, so macOS may ask you to confirm the first l
 - **Add / Edit:** name, command (multi-line), working directory (`~` supported), environment (`KEY=VALUE` per line),
   auto-start, and restart policy.
 - **Settings › General:** launch at login, auto-start on launch, restore after crash (ask / always / never),
-  reload shell environment.
+  automatic update checks, reload shell environment.
 - **Settings › MCP:** enable/disable, port, status, endpoint, and copyable client config snippets.
 
 ### How commands run
@@ -205,10 +213,11 @@ Sources/Wickbar/
   App/                   SwiftUI app (MenuBarExtra + Window + Settings), AppDelegate (quit handling)
   Runtime/               ShellEnvironment, ManagedProcess (PTY via SwiftTerm LocalProcess), ProcessManager, ProcessTree
   UI/                    Menu bar popover, main window, detail + terminal pane, editor, settings
-  System/                Launch at login (SMAppService), notifications
+  System/                Launch at login (SMAppService), notifications, updates (Sparkle)
 Tests/WickbarTests/      Output buffer / ANSI, config round-trip, HTTP parsing, JSON-RPC/MCP dispatch, command lookup
-scripts/build-app.sh     Release build, .app assembly, icon generation, signing (ad-hoc or SIGN_IDENTITY)
+scripts/build-app.sh     Release build, .app assembly (embeds Sparkle.framework), icon generation, signing (ad-hoc or SIGN_IDENTITY)
 scripts/package-release.sh  Developer ID sign + notarize + staple, then zip + DMG (used by the release workflow)
+scripts/make-appcast.sh  Sparkle appcast for a release (EdDSA-signed zip + CHANGELOG notes)
 scripts/make-dmg.sh      Drag-to-Applications DMG (create-dmg) with a drawn background (make-dmg-background.swift)
 scripts/demo.sh          Isolated demo copy with sample commands (used for screenshots)
 scripts/make-icon.swift  Draws the app icon (flame on a warm rounded square)

@@ -10,6 +10,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/migueldeicaza/SwiftTerm.git", from: "1.2.0"),
+        .package(url: "https://github.com/sparkle-project/Sparkle", from: "2.10.1"),
     ],
     targets: [
         // Pure logic: config model, output buffer / ANSI stripping, JSON, MCP dispatch, HTTP parsing.
@@ -23,6 +24,7 @@ let package = Package(
             dependencies: [
                 "WickbarCore",
                 .product(name: "SwiftTerm", package: "SwiftTerm"),
+                .product(name: "Sparkle", package: "Sparkle"),
             ],
             path: "Sources/Wickbar"
         ),

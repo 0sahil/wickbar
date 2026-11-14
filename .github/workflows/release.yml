@@ -1,8 +1,9 @@
 name: Release
 
 # Push a tag like v0.1.0 (must match the VERSION file). Builds a Developer ID signed,
-# notarized and stapled Wickbar.app and attaches it to a DRAFT GitHub release.
-# Review the draft's notes, then publish it by hand.
+# notarized and stapled Wickbar.app and attaches it, with the Sparkle appcast.xml, to a DRAFT GitHub release.
+# Review the draft's notes, then publish it by hand. Publishing is what makes the update visible to installed
+# copies: they read releases/latest/download/appcast.xml, and drafts don't count as "latest".
 on:
   push:
     tags: ["v*"]
@@ -44,9 +45,11 @@ jobs:
         env:
           P12: ${{ secrets.DEVELOPER_ID_P12_BASE64 }}
           KEY: ${{ secrets.NOTARY_API_KEY_BASE64 }}
+          ED_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
         run: |
           [[ -n "$P12" ]] || { echo "::error::Secret DEVELOPER_ID_P12_BASE64 is missing (see docs/RELEASING.md)"; exit 1; }
           [[ -n "$KEY" ]] || { echo "::error::Secret NOTARY_API_KEY_BASE64 is missing (see docs/RELEASING.md)"; exit 1; }
+          [[ -n "$ED_KEY" ]] || { echo "::error::Secret SPARKLE_ED_PRIVATE_KEY is missing (see docs/RELEASING.md)"; exit 1; }
 
       - name: Test
         run: swift test
@@ -86,6 +89,13 @@ jobs:
           NOTARY_ISSUER_ID: ${{ secrets.NOTARY_API_ISSUER_ID }}
         run: bash scripts/package-release.sh
 
+      # Signs the zip (the update archive Sparkle downloads) with the EdDSA key, passed to sign_update on
+      # stdin so it never touches disk, and checks the signature against the app's SUPublicEDKey.
+      - name: Generate Sparkle appcast
+        env:
+          SPARKLE_ED_PRIVATE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
+        run: bash scripts/make-appcast.sh
+
       - name: Release notes from CHANGELOG
         run: |
           awk -v v="$VERSION" '
@@ -102,10 +112,11 @@ jobs:
         run: |
           ZIP="build/Wickbar-$VERSION.zip"
           DMG="build/Wickbar-$VERSION.dmg"
+          APPCAST="build/appcast.xml"
           if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" "$DMG" "$DMG.sha256" "$ZIP" "$ZIP.sha256" --clobber
+            gh release upload "$TAG" "$DMG" "$DMG.sha256" "$ZIP" "$ZIP.sha256" "$APPCAST" --clobber
           else
-            gh release create "$TAG" "$DMG" "$DMG.sha256" "$ZIP" "$ZIP.sha256" --draft \
+            gh release create "$TAG" "$DMG" "$DMG.sha256" "$ZIP" "$ZIP.sha256" "$APPCAST" --draft \
               --title "Wickbar $VERSION" --notes-file "$RUNNER_TEMP/notes.md"
           fi
 

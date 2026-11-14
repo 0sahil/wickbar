@@ -22,6 +22,7 @@ struct EditorRequest: Identifiable {
 final class AppDelegate: NSObject, NSApplicationDelegate {
     let manager = ProcessManager()
     let ui = UIState()
+    let updater = Updater()
     private var terminating = false
     private var signalSources: [DispatchSourceSignal] = []
 
@@ -29,6 +30,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.setActivationPolicy(.accessory)
         installSignalHandlers()
         manager.bootstrap()
+        updater.start()
         // SwiftUI may auto-open the main Window scene at launch; Wickbar starts in the menu bar only.
         DispatchQueue.main.async {
             for w in NSApp.windows where w.identifier?.rawValue.hasPrefix("main") == true {
@@ -69,6 +71,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    /// Sparkle's "Install and Relaunch" arrives here too: its installer sends a quit Apple Event, which AppKit
+    /// dispatches from the event loop (not a main-queue block), so the async shutdown below can run. Commands are
+    /// stopped before the update is installed; the installer waits for the process to exit.
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         if terminating { return .terminateLater }
         terminating = true

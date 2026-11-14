@@ -10,6 +10,7 @@ struct WickbarApp: App {
             MenuBarView()
                 .environmentObject(appDelegate.manager)
                 .environmentObject(appDelegate.ui)
+                .environmentObject(appDelegate.updater)
         } label: {
             MenuBarLabel(manager: appDelegate.manager)
                 .modifier(OpenWindowBridge(ui: appDelegate.ui))
@@ -22,10 +23,28 @@ struct WickbarApp: App {
                 .environmentObject(appDelegate.ui)
         }
         .defaultSize(width: 980, height: 640)
+        .commands {
+            CommandGroup(after: .appInfo) {
+                CheckForUpdatesCommand(updater: appDelegate.updater)
+            }
+        }
 
         Settings {
             SettingsView()
                 .environmentObject(appDelegate.manager)
+                .environmentObject(appDelegate.updater)
+        }
+    }
+}
+
+/// App-menu item for when a Wickbar window is focused. Commands don't get environment objects, hence the explicit observation.
+private struct CheckForUpdatesCommand: View {
+    @ObservedObject var updater: Updater
+
+    var body: some View {
+        if updater.isAvailable {
+            Button("Check for Updates…") { updater.checkForUpdates() }
+                .disabled(!updater.canCheckForUpdates)
         }
     }
 }

@@ -6,6 +6,12 @@ All notable changes to Wickbar are documented here. The format is based on
 
 ## [Unreleased]
 
+### Added
+- In-app updates: Wickbar checks for new versions once a day and can download, install and relaunch itself. Running commands are stopped cleanly before the relaunch.
+- "Check for Updates…" in the menu bar popover and the app menu.
+- When a background check finds an update, an "Update available" row appears in the popover instead of a window popping up behind other apps.
+- Settings › General: "Automatically check for updates" toggle, with the installed version shown below it.
+
 ## [0.1.1] - 2026-11-12
 
 ### Added

@@ -23,6 +23,7 @@ struct MenuBarLabel: View {
 struct MenuBarView: View {
     @EnvironmentObject var manager: ProcessManager
     @EnvironmentObject var ui: UIState
+    @EnvironmentObject var updater: Updater
     @Environment(\.openWindow) private var openWindow
     @Environment(\.openSettings) private var openSettings
 
@@ -79,6 +80,11 @@ struct MenuBarView: View {
 
             Divider()
             VStack(alignment: .leading, spacing: 0) {
+                if let version = updater.pendingUpdateVersion {
+                    MenuButton(title: "Update available: \(version)", systemImage: "arrow.down.circle") {
+                        updater.checkForUpdates()
+                    }
+                }
                 MenuButton(title: "Open Wickbar", systemImage: "macwindow") { openMain() }
                 if !manager.processes.isEmpty {
                     MenuButton(title: "Add command…", systemImage: "plus") { openMain(add: true) }
@@ -90,6 +96,12 @@ struct MenuBarView: View {
                 MenuButton(title: "Settings…", systemImage: "gearshape") {
                     NSApp.activate(ignoringOtherApps: true)
                     openSettings()
+                }
+                if updater.isAvailable {
+                    MenuButton(title: "Check for Updates…", systemImage: "arrow.triangle.2.circlepath") {
+                        updater.checkForUpdates()
+                    }
+                    .disabled(!updater.canCheckForUpdates)
                 }
                 Divider().padding(.vertical, 4)
                 MenuButton(title: "Quit Wickbar", systemImage: "power") { AppDelegate.quit() }
@@ -195,8 +207,10 @@ private struct MenuButton: View {
     let systemImage: String
     let action: () -> Void
     @State private var hovering = false
+    @Environment(\.isEnabled) private var isEnabled
 
     var body: some View {
+        let highlighted = hovering && isEnabled
         Button(action: action) {
             HStack {
                 Image(systemName: systemImage)
@@ -207,8 +221,8 @@ private struct MenuButton: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 4)
-            .background(RoundedRectangle(cornerRadius: 4).fill(hovering ? Color.accentColor.opacity(0.85) : .clear))
-            .foregroundStyle(hovering ? Color.white : Color.primary)
+            .background(RoundedRectangle(cornerRadius: 4).fill(highlighted ? Color.accentColor.opacity(0.85) : .clear))
+            .foregroundStyle(highlighted ? Color.white : isEnabled ? Color.primary : Color.secondary)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
