@@ -6,6 +6,8 @@ All notable changes to Wickbar are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-14
+
 ### Added
 - In-app updates: Wickbar checks for new versions once a day and can download, install and relaunch itself. Running commands are stopped cleanly before the relaunch.
 - "Check for Updates…" in the menu bar popover and the app menu.
@@ -34,6 +36,7 @@ First public release.
 - Human-editable `config.json`, watched for external edits.
 - Built-in MCP server (Streamable HTTP, `127.0.0.1:9425/mcp`) with 14 tools so agents can add, configure, start, stop and read the logs of commands.
 
-[Unreleased]: https://github.com/0sahil/wickbar/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/0sahil/wickbar/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/0sahil/wickbar/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/0sahil/wickbar/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/0sahil/wickbar/releases/tag/v0.1.0
