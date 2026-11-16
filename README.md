@@ -1,9 +1,26 @@
-# Wickbar
+<p align="center">
+  <img src="docs/images/icon.png" width="128" height="128" alt="Wickbar app icon">
+</p>
 
-[![CI](https://github.com/0sahil/wickbar/actions/workflows/ci.yml/badge.svg)](https://github.com/0sahil/wickbar/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+<h1 align="center">Wickbar</h1>
 
-A native macOS menu-bar app that keeps your long-running terminal commands alive and visible.
+<p align="center">
+  Keep your long-running terminal commands alive and visible, from the macOS menu bar.
+</p>
+
+<p align="center">
+  <a href="https://github.com/0sahil/wickbar/releases/latest"><b>Download</b></a>
+  &nbsp;·&nbsp;
+  <a href="#install">Install</a>
+  &nbsp;·&nbsp;
+  <a href="#mcp-let-agents-control-wickbar">MCP</a>
+  &nbsp;·&nbsp;
+  <a href="CHANGELOG.md">Changelog</a>
+  <br>
+  <sub>macOS 14 Sonoma or later · Apple Silicon · MIT</sub>
+</p>
+
+![Wickbar main window: a sidebar of saved commands with status dots, and a live terminal showing a running dev server](docs/images/main-window.png)
 
 Instead of keeping a terminal tab open per server (`npm run dev`, `tailscale serve 3000`,
 `python -m http.server`, …), save them in Wickbar and:
@@ -14,18 +31,15 @@ Instead of keeping a terminal tab open per server (`npm run dev`, `tailscale ser
 - restart them automatically when they crash (exponential backoff),
 - let agents configure and control them over **MCP**.
 
-![Wickbar main window: a sidebar of saved commands with status dots, and a live terminal showing a running dev server](docs/images/main-window.png)
-
-<img src="docs/images/popover.png" width="360" alt="Wickbar menu bar popover: running commands with uptime and restart/stop buttons, plus Open Wickbar, Add command, Start all, Stop all, Settings and Quit">
-
-Requires macOS 14 (Sonoma) or later on Apple Silicon. Wickbar is not sandboxed (it runs arbitrary shell
-commands), so it is distributed outside the Mac App Store.
+<img src="docs/images/popover.png" width="360" alt="Wickbar menu bar popover: running commands with uptime and restart/stop buttons, plus Open Wickbar, Add command, Start all, Stop all, Settings, Check for Updates and Quit">
 
 ## Install
 
 Download `Wickbar-<version>.dmg` from the [latest release](https://github.com/0sahil/wickbar/releases/latest),
 open it, and drag Wickbar into Applications (a `.zip` is attached too). Releases are signed with a Developer ID and notarized by Apple,
 so they open without Gatekeeper warnings. Then click the flame in the menu bar.
+
+Wickbar is not sandboxed (it runs arbitrary shell commands), so it is distributed outside the Mac App Store.
 
 ### Updating
 
@@ -34,30 +48,6 @@ day it adds a quiet "Update available" row to the menu bar popover instead. Clic
 *Install and Relaunch* (your running commands are stopped cleanly first).
 You can also use *Check for Updates…* in the popover, or turn automatic checks off in *Settings › General*.
 Versions 0.1.x have no updater, so install 0.2.0 manually once; updates are automatic from then on.
-
-## Build from source
-
-You need Xcode (or the Swift toolchain) with Swift 6.2 or newer, and network access for SwiftPM to fetch
-[SwiftTerm](https://github.com/migueldeicaza/SwiftTerm) and [Sparkle](https://sparkle-project.org) (updates).
-
-```sh
-swift build                       # debug build
-swift test                        # unit tests
-scripts/build-app.sh              # release build -> build/Wickbar.app (ad-hoc signed, with icon)
-scripts/build-app.sh --install    # same, then copies it to /Applications/Wickbar.app
-open /Applications/Wickbar.app
-```
-
-The version comes from the `VERSION` file. The bundle id is `com.0sahil.wickbar`. The app is an
-`LSUIElement` (no Dock icon) until you open its main window.
-
-To try it without touching your own setup, `scripts/demo.sh` launches a second, isolated copy with
-sample commands (`scripts/demo.sh --stop` quits it). Any copy can be pointed at a different config folder
-with the `WICKBAR_CONFIG_DIR` environment variable.
-
-Local builds are only ad-hoc signed, so macOS may ask you to confirm the first launch
-(right-click › Open, or System Settings › Privacy & Security). Maintainers: see
-[docs/RELEASING.md](docs/RELEASING.md) for signed, notarized releases.
 
 ## Usage
 
@@ -201,6 +191,30 @@ Quick check with curl:
 curl -s http://127.0.0.1:9425/mcp -H 'Content-Type: application/json' \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"list_commands","arguments":{}}}'
 ```
+
+## Build from source
+
+You need Xcode (or the Swift toolchain) with Swift 6.2 or newer, and network access for SwiftPM to fetch
+[SwiftTerm](https://github.com/migueldeicaza/SwiftTerm) and [Sparkle](https://sparkle-project.org) (updates).
+
+```sh
+swift build                       # debug build
+swift test                        # unit tests
+scripts/build-app.sh              # release build -> build/Wickbar.app (ad-hoc signed, with icon)
+scripts/build-app.sh --install    # same, then copies it to /Applications/Wickbar.app
+open /Applications/Wickbar.app
+```
+
+The version comes from the `VERSION` file. The bundle id is `com.0sahil.wickbar`. The app is an
+`LSUIElement` (no Dock icon) until you open its main window.
+
+To try it without touching your own setup, `scripts/demo.sh` launches a second, isolated copy with
+sample commands (`scripts/demo.sh --stop` quits it). Any copy can be pointed at a different config folder
+with the `WICKBAR_CONFIG_DIR` environment variable.
+
+Local builds are only ad-hoc signed, so macOS may ask you to confirm the first launch
+(right-click › Open, or System Settings › Privacy & Security). Maintainers: see
+[docs/RELEASING.md](docs/RELEASING.md) for signed, notarized releases.
 
 ## Project layout
 
